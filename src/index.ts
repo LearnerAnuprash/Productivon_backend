@@ -1,3 +1,4 @@
+import "dotenv/config";
 import app, { startApolloServer } from "./app";
 import { connectDB } from "./config/database";
 

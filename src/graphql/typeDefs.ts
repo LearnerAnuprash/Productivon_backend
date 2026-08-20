@@ -3,16 +3,26 @@ import { gql } from "graphql-tag";
 export const typeDefs = gql`
   type User {
     id: ID!
-    name: String!
     email: String!
+    name: String!
+  }
+
+  type AuthPayload {
+    token: String!
+    user: User!
   }
 
   type Query {
-    users: [User!]!
-    user(id: ID!): User
+    me: User
   }
 
   type Mutation {
-    createUser(name: String!, email: String!): User!
+    signup(
+      email: String!
+      password: String!
+      confirmPassword: String!
+    ): AuthPayload!
+
+    login(email: String!, password: String!): AuthPayload!
   }
 `;

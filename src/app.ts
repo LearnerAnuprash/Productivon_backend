@@ -1,6 +1,7 @@
 import express from "express";
 import http from "http";
 import cors from "cors";
+import jwt from "jsonwebtoken";
 import { typeDefs } from "./graphql/typeDefs";
 import { resolvers } from "./graphql/resolvers";
 import { ApolloServer } from "@apollo/server";
@@ -22,7 +23,33 @@ export const startApolloServer = async () => {
 
   await apolloServer.start();
 
-  app.use("/graphql", cors(), express.json(), expressMiddleware(apolloServer));
+  app.use(
+    "/graphql",
+    cors(),
+    express.json(),
+    expressMiddleware(apolloServer, {
+      context: async ({ req }) => {
+        const authHeader = req.headers.authorization;
+        const token = authHeader?.startsWith("Bearer ")
+          ? authHeader.slice(7)
+          : null;
+
+        if (!token) return { userId: null };
+
+        try {
+          const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET as string,
+          ) as {
+            userId: number;
+          };
+          return { userId: decoded.userId };
+        } catch {
+          return { userId: null };
+        }
+      },
+    }),
+  );
 
   return { app, httpServer };
 };
