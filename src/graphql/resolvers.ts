@@ -1,24 +1,25 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import User from "../models/User";
 import { signupSchema } from "../schema/signup-schema";
 import { loginSchema } from "../schema/login-schema";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN as SignOptions["expiresIn"];
 
-type userIdCtx = {
+type userIdContext = {
   userId: number | null;
 };
 
 const generateToken = (userId: number) => {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "1d" });
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
 export const resolvers = {
   Query: {
-    me: async (_: unknown, __: unknown, userIdCtx: userIdCtx) => {
-      if (!userIdCtx.userId) throw new Error("User not authenticated.");
-      const user = await User.findByPk(userIdCtx.userId);
+    me: async (_: unknown, __: unknown, context: userIdContext) => {
+      if (!context.userId) throw new Error("User not authenticated.");
+      const user = await User.findByPk(context.userId);
       if (!user) throw new Error("User not found.");
       return user;
     },
@@ -37,16 +38,9 @@ export const resolvers = {
           "Duplicate Email Adress for this user. Please login instead.",
         );
       const hashedPassword = await bcrypt.hash(validatedData.password, 10);
-      const hashedConfirmPassword = await bcrypt.hash(
-        validatedData.confirmPassword,
-        10,
-      );
-      if (hashedPassword !== hashedConfirmPassword)
-        throw new Error("Password and Confirm password don't match.");
-
       const user = await User.create({
-        email: args.email,
-        password: args.password,
+        email: validatedData.email,
+        password: hashedPassword,
       });
 
       return { token: generateToken(user.id) };

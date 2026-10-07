@@ -3,7 +3,7 @@ import sequelize from "../config/database";
 
 class User extends Model {
   declare public id: number;
-  declare public name: string;
+  declare public name: string | null;
   declare public email: string;
   declare public password: string;
 }
@@ -11,7 +11,7 @@ class User extends Model {
 User.init(
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    name: { type: DataTypes.STRING, allowNull: false },
+    name: { type: DataTypes.STRING, allowNull: true },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: { type: DataTypes.STRING, allowNull: false },
   },
