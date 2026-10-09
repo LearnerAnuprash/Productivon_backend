@@ -2,11 +2,11 @@ import express from "express";
 import http from "http";
 import cors from "cors";
 import jwt from "jsonwebtoken";
-import { typeDefs } from "./graphql/typeDefs";
-import { resolvers } from "./graphql/resolvers";
 import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { expressMiddleware } from "@as-integrations/express5";
+import { typeDefs } from "./graphql/typeDefs";
+import { resolvers } from "./graphql/resolvers";
 
 const app = express();
 const httpServer = http.createServer(app);
